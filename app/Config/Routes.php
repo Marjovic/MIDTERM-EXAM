@@ -14,4 +14,16 @@ $routes->post(from: '/register', to: 'Auth::register');
 $routes->get(from: '/login', to: 'Auth::login');
 $routes->post(from: '/login', to: 'Auth::login');
 $routes->get(from: '/logout', to: 'Auth::logout');
-$routes->get(from: '/dashboard', to: 'Auth::dashboard');
+
+$routes->get('announcements', 'Announcement::index', ['filter' => 'roleauth']);
+
+// Admin routes - protected by RoleAuth filter
+$routes->group('admin', ['filter' => 'roleauth'], function($routes) {
+    $routes->get('dashboard', 'Admin::dashboard');
+});
+
+// Teacher routes - protected by RoleAuth filter
+$routes->group('teacher', ['filter' => 'roleauth'], function($routes) {
+    $routes->get('dashboard', 'Teacher::dashboard');
+});
+
