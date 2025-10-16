@@ -29,7 +29,7 @@ class Database extends Config
         'hostname'     => 'localhost',
         'username'     => 'root',
         'password'     => 'Sheamar@442211',
-        'database'     => 'lms_alejado',
+        'database'     => 'lms_midterm_alejado',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,
