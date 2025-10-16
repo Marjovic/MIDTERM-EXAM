@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Announcements - MGOD LMS' ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
@@ -92,55 +92,6 @@
                 <?php endif; ?>
             </div>
         </div>
-
-        <!-- Quick Stats -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h5 class="card-title">Total Announcements</h5>
-                                <h2 class="mb-0"><?= count($announcements) ?></h2>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="fas fa-bullhorn fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h5 class="card-title">Your Role</h5>
-                                <h2 class="mb-0"><?= ucfirst(esc($user['role'])) ?></h2>
-                            </div>
-                            <div class="align-self-center">
-                                <?php if ($user['role'] === 'admin'): ?>
-                                    <i class="fas fa-user-shield fa-2x"></i>
-                                <?php elseif ($user['role'] === 'teacher'): ?>
-                                    <i class="fas fa-chalkboard-teacher fa-2x"></i>
-                                <?php else: ?>
-                                    <i class="fas fa-user-graduate fa-2x"></i>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3 mt-5">
-        <div class="container">
-            <p class="mb-0">&copy; 2025 MGOD Learning Management System. All rights reserved.</p>
-        </div>
-    </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
