@@ -32,12 +32,21 @@ class Auth extends BaseController
     // This function shows the registration form and processes new user accounts
     // Steps: 1) Check if already logged in 2) Validate form data 3) Save to database 4) Redirect
     public function register()
-    {
-        // Step 1: Check if user is already logged in
+    {        // Step 1: Check if user is already logged in
         // If someone is already logged in, they don't need to register again
         if ($this->session->get('isLoggedIn') === true) {
-            // Send them to their unified dashboard instead of registration page
-            return redirect()->to(uri: base_url(relativePath: 'dashboard'));
+            // Redirect based on role if already logged in
+            $userRole = $this->session->get('role');
+            switch ($userRole) {
+                case 'student':
+                    return redirect()->to(base_url('announcements'));
+                case 'teacher':
+                    return redirect()->to(base_url('teacher/dashboard'));
+                case 'admin':
+                    return redirect()->to(base_url('admin/dashboard'));
+                default:
+                    return redirect()->to(base_url('announcements'));
+            }
         }
 
         // Step 2: Check if the registration form was submitted
@@ -113,24 +122,33 @@ class Auth extends BaseController
                 }
             } else {
                 // Validation failed: User input didn't meet the requirements
-                // Show all validation error messages to help user fix their input                $this->session->setFlashdata(data: 'errors', value: $this->validation->getErrors());
+                // Show all validation error messages to help user fix their input               
+                 $this->session->setFlashdata(data: 'errors', value: $this->validation->getErrors());
             }
-        }
-
-        // Step 4: Show the registration form page
+        }        // Step 4: Show the registration form page
         // This runs when user first visits registration page OR if there were errors
         return view(name: 'auth/register');
     }
 
-    // Login Method - This handles user sign-in with unified dashboard redirect
+    // Login Method - This handles user sign-in with role-based dashboard redirect
     // This function shows login form and processes user login attempts
-    // Steps: 1) Check if already logged in 2) Validate login form 3) Check password 4) Create session 5) Redirect to dashboard
+    // Steps: 1) Check if already logged in 2) Validate login form 3) Check password 4) Create session 5) Redirect based on role
     public function login()
     {
         // Step 1: Check if user is already logged in
-        // If someone is already logged in, send them to unified dashboard
-        if ($this->session->get('isLoggedIn') === true) {
-            return redirect()->to(uri: base_url(relativePath: 'dashboard'));
+        // If someone is already logged in, redirect them based on their role
+        if ($this->session->get(key: 'isLoggedIn') === true) {
+            $userRole = $this->session->get(key: 'role');
+            switch ($userRole) {
+                case 'student':
+                    return redirect()->to(uri: base_url(relativePath: 'announcements'));
+                case 'teacher':
+                    return redirect()->to(uri: base_url(relativePath: 'teacher/dashboard'));
+                case 'admin':
+                    return redirect()->to(uri: base_url(relativePath: 'admin/dashboard'));
+                default:
+                    return redirect()->to(uri: base_url(relativePath: 'announcements'));
+            }
         }
 
         // Step 2: Check if login form was submitted
@@ -180,15 +198,23 @@ class Auth extends BaseController
                         'email'      => $user['email'],    // Store user's email address
                         'role'       => $user['role'],     // Store user's role (admin, teacher, or student)
                         'isLoggedIn' => true               // Mark that user is successfully logged in
-                    ];
-
-                    // Save all session data - this remembers the user across pages
+                    ];                    // Save all session data - this remembers the user across pages
                     $this->session->set(data: $sessionData);
                     
-                    // Step 4b: Show welcome message and redirect user to unified dashboard
-                    // All users go to the same dashboard route - role is handled inside dashboard method
+                    // Step 4b: Show welcome message and redirect user based on their role
                     $this->session->setFlashdata(data: 'success', value: 'Welcome back, ' . $user['name'] . '!');
-                    return redirect()->to(uri: base_url(relativePath: 'dashboard'));
+                    
+                    // Redirect based on user role
+                    switch ($user['role']) {
+                        case 'student':
+                            return redirect()->to(uri: base_url(relativePath: 'announcements'));
+                        case 'teacher':
+                            return redirect()->to(uri: base_url(relativePath: 'teacher/dashboard'));
+                        case 'admin':
+                            return redirect()->to(uri: base_url(relativePath: 'admin/dashboard'));
+                        default:
+                            return redirect()->to(uri: base_url(relativePath: 'announcements'));
+                    }
                     
                 } else {
                     // Step 3c: Login failed - either email doesn't exist or password is wrong
@@ -221,77 +247,5 @@ class Auth extends BaseController
         
         // Step 3: Send user back to login page so they can log in again if needed
         return redirect()->to(uri: base_url(relativePath: 'login'));
-    }
-
-    // Dashboard Method - This shows unified dashboard based on user role
-    // This is the main dashboard that handles all user types in one place
-    // Only accessible to users who are logged in
-    public function dashboard()
-    {
-        // Step 1: Check if user is logged in first
-        // If not logged in, they can't access any dashboard
-        if ($this->session->get('isLoggedIn') !== true) {
-            // Show error message and send to login page
-            $this->session->setFlashdata(data: 'error', value: 'Please login to access the dashboard.');
-            return redirect()->to(uri: base_url(relativePath: 'login'));
-        }
-
-        // Step 2: Get user role from session to determine what data to fetch
-        // Each role needs different data and different dashboard view
-        $userRole = $this->session->get(key: 'role');
-        
-        // Step 3: Prepare basic user data that all roles need
-        $baseData = [
-            'user' => [
-                'userID' => $this->session->get(key: 'userID'), // User's ID number
-                'name'   => $this->session->get(key: 'name'),   // User's full name
-                'email'  => $this->session->get(key: 'email'), // User's email address
-                'role'   => $this->session->get(key: 'role')   // User's role
-            ]
-        ];
-
-        // Step 4: Get role-specific data and determine view based on user type
-        switch ($userRole) {
-            case 'admin':
-                // Admin gets system statistics and user management data
-                $totalUsers = $this->db->table('users')->countAll();
-                $totalAdmins = $this->db->table('users')->where('role', 'admin')->countAllResults();
-                $totalTeachers = $this->db->table('users')->where('role', 'teacher')->countAllResults();
-                $totalStudents = $this->db->table('users')->where('role', 'student')->countAllResults();
-                $recentUsers = $this->db->table('users')->orderBy('created_at', 'DESC')->limit(5)->get()->getResultArray();
-
-                $dashboardData = array_merge($baseData, [
-                    'title' => 'Admin Dashboard - MGOD LMS',
-                    'totalUsers' => $totalUsers,
-                    'totalAdmins' => $totalAdmins,
-                    'totalTeachers' => $totalTeachers,
-                    'totalStudents' => $totalStudents,
-                    'recentUsers' => $recentUsers
-                ]);
-                  return view('auth/dashboard', $dashboardData);
-                
-            case 'teacher':
-                // Teacher gets course and student data 
-                $dashboardData = array_merge($baseData, [
-                    'title' => 'Teacher Dashboard - MGOD LMS',
-                    'totalCourses' => 0,    // Replace with actual course count from database
-                    'totalStudents' => 0    // Replace with actual student count from database
-                ]);
-                
-                return view('auth/dashboard', $dashboardData);
-                
-            case 'student':
-                // Student gets enrollment and assignment data 
-                $dashboardData = array_merge($baseData, [
-                    'title' => 'Student Dashboard - MGOD LMS',
-                    'enrolledCourses' => 0,      // Replace with actual enrolled courses count
-                    'completedAssignments' => 0, // Replace with actual completed assignments count
-                    'pendingAssignments' => 0    // Replace with actual pending assignments count
-                ]);
-                
-                return view('auth/dashboard', $dashboardData);                  default:
-                // If role is unknown, show generic dashboard
-                return view('auth/dashboard', $baseData);
-        }
     }
 }
