@@ -25,14 +25,22 @@ class AnnouncementModel extends Model
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = '';
-    protected $deletedField  = '';
-
-    // Validation
+    protected $deletedField  = '';    // Validation
     protected $validationRules      = [
-        'title'   => 'required|max_length[255]',
-        'content' => 'required',
+        'title'   => 'required|max_length[255]|regex_match[/^[a-zA-Z0-9\s.,!?-]+$/]',  // Title: letters, numbers, spaces, and basic punctuation only
+        'content' => 'required|regex_match[/^[a-zA-Z0-9\s.,!?;:()\-\n\r]+$/]',         // Content: letters, numbers, spaces, punctuation, and line breaks only
     ];
-    protected $validationMessages   = [];
+    protected $validationMessages   = [
+        'title' => [
+            'required'     => 'Announcement title is required.',
+            'max_length'   => 'Title cannot exceed 255 characters.',
+            'regex_match'  => 'Title can only contain letters, numbers, spaces, and basic punctuation.'
+        ],
+        'content' => [
+            'required'    => 'Announcement content is required.',
+            'regex_match' => 'Content can only contain letters, numbers, spaces, and standard punctuation marks.'
+        ]
+    ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 

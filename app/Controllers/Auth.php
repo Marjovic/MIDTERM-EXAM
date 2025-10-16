@@ -52,28 +52,28 @@ class Auth extends BaseController
         // Step 2: Check if the registration form was submitted
         // This happens when user fills the form and clicks "Register" button
         if ($this->request->getMethod() === 'POST') {
-            
-            // Step 2a: Set validation rules - these are the requirements for each form field
+              // Step 2a: Set validation rules - these are the requirements for each form field
             // Each rule tells the system what to check for in the user's input
             $rules = [
-                'name'             => 'required|min_length[3]|max_length[100]',  // Name must exist and be 3-100 characters
-                'email'            => 'required|valid_email|is_unique[users.email]', // Email must be valid format and not already used
+                'name'             => 'required|min_length[3]|max_length[100]|regex_match[/^[a-zA-Z\s]+$/]',  // Name must be 3-100 characters and only letters/spaces
+                'email'            => 'required|valid_email|is_unique[users.email]|regex_match[/^[a-zA-Z0-9._@]+$/]', // Email must be valid, unique, and only contain allowed characters (letters, numbers, ., _, @)
                 'password'         => 'required|min_length[6]',                 // Password must exist and be at least 6 characters
                 'password_confirm' => 'required|matches[password]'              // Password confirmation must match the password
-            ];
-
+            ];            
             // Step 2b: Set error messages - these are shown to user if validation fails
             // Each message explains what went wrong in simple language
             $messages = [
                 'name' => [
-                    'required'   => 'Name is required.',                        // Show if user didn't enter name
-                    'min_length' => 'Name must be at least 3 characters long.', // Show if name is too short
-                    'max_length' => 'Name cannot exceed 100 characters.'        // Show if name is too long
+                    'required'    => 'Name is required.',                        // Show if user didn't enter name
+                    'min_length'  => 'Name must be at least 3 characters long.', // Show if name is too short
+                    'max_length'  => 'Name cannot exceed 100 characters.',       // Show if name is too long
+                    'regex_match' => 'Name can only contain letters and spaces.' // Show if name has numbers or special characters
                 ],
                 'email' => [
                     'required'    => 'Email is required.',                      // Show if user didn't enter email
                     'valid_email' => 'Please enter a valid email address.',     // Show if email format is wrong (no @ sign, etc.)
-                    'is_unique'   => 'This email is already registered.'        // Show if someone already uses this email
+                    'is_unique'   => 'This email is already registered.',       // Show if someone already uses this email
+                    'regex_match' => 'Invalid Email Format! Email should be formatted like this marjovic_alejado@lms.com' // Show if email has invalid characters
                 ],
                 'password' => [
                     'required'   => 'Password is required.',                    // Show if user didn't enter password
